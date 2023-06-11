@@ -21,23 +21,6 @@ Welcome to Velosphere! This is a full stack web application built using the MERN
 - Node.js and npm should be installed on your system.
 - MongoDB Atlas account for cloud database hosting.
 
-## Getting Started
-
-1. Clone the repository:
-   git clone <repository-url>
-2. Install dependencies:
-   Copy code
-   cd intern-connect
-   npm install
-3. Set up environment variables:
-   Create a .env file in the root directory.
-   Define the following environment variables:
-   MONGODB_URI: Connection URL for your MongoDB Atlas database.
-   SECRET_KEY: Secret key for JWT token generation.
-4. Start the developement server:
-   npm start
-5. Open your browser and visit http://localhost:3000 to view the application.
-
 ## Contributing
 
 Contributions are welcome! If you have any ideas, suggestions, or bug reports, please feel free to open an issue or submit a pull request.
