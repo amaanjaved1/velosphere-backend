@@ -1,0 +1,5 @@
+Temporary file to keep track of init commands
+
+npm i -g nodemon
+npm i express body-parser bcrypt cors dotenv gridfs-stream multer multer-gridfs-storage helmet morgan jsonwebtoken mongoose sequelize pg 
+nom init -y
