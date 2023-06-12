@@ -162,8 +162,12 @@ export const resendConfirmationEmail = async (req, res) => {
     // Retrieve the necessary data from the request, such as email and token
     const { email } = req.body;
 
+    const payload = {
+      p_email: email,
+    };
+
     // Call the function responsible for sending the confirmation email
-    await sendConfirmationEmail(email);
+    await sendConfirmationEmail(req, res, payload);
 
     // Send the response back to the client
     res.status(200).json({ message: "Confirmation email resent successfully" });
