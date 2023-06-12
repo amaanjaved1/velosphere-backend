@@ -61,15 +61,12 @@ export const register = async (req, res) => {
       return res.status(401).json({ message: "Invalid email" });
     }
 
-    const salt = await bcrypt.genSalt();
-    const passwordHash = await bcrypt.hash(password, salt);
-
     const registrationQuery =
       "INSERT INTO users (username, password, firstname, lastname, email, studentprogram, company, internposition, educationalinstitution, schoolprogram, profilepicture, meinonesentence, studentlocation, twitter, linkedin, facebook, github, internteam, mein4tags1, mein4tags2, mein4tags3, mein4tags4) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)";
 
     const registrationValues = [
       username,
-      passwordHash,
+      password,
       firstName,
       lastName,
       email,
@@ -125,7 +122,7 @@ export const login = async (req, res) => {
 
     const quser = rows[0];
 
-    const isValidPassword = await bcrypt.compare(password, quser.password);
+    const isValidPassword = password === quser.password;
 
     // If the password is invalid, send a 400 status code and a message saying that the password is invalid
     if (!isValidPassword) {
@@ -162,6 +159,23 @@ export const resendConfirmationEmail = async (req, res) => {
     // Retrieve the necessary data from the request, such as email and token
     const { email } = req.body;
 
+    const emailCompany = email.split("@")[1].split(".")[0];
+    let match;
+
+    if (
+      emailCompany === "tangerine" ||
+      emailCompany === "scotiabank" ||
+      emailCompany === "mdfinancial"
+    ) {
+      match = true;
+    } else {
+      match = false;
+    }
+
+    if (!match) {
+      return res.status(401).json({ message: "Invalid email" });
+    }
+
     const payload = {
       p_email: email,
     };
@@ -178,7 +192,6 @@ export const resendConfirmationEmail = async (req, res) => {
 
 export const sendConfirmationEmail = async (req, res, payload) => {
   try {
-    // Payload prints undefined here
     let email = payload.p_email;
     const token = jwt.sign(email, process.env.JWT_SECRET);
 
@@ -197,10 +210,9 @@ export const sendConfirmationEmail = async (req, res, payload) => {
       to: process.env.RECEIVING_EMAIL,
       subject: "Confirm your email",
       html: `<h1>Email Confirmation</h1>
-      <h2>Hello ${email}</h2>
-      <p>Thank you for registering. Please confirm your email by clicking on the following link</p>
-      <a href="${url}">${url}</a>
-      </div>`,
+    <h2>Hello ${email}</h2>
+    <p>Thank you for registering. Please confirm your email by clicking on the following link:</p>
+    <a href="${url}">${url}</a>`,
     };
 
     await transporter.sendMail(mailOptions, (err, info) => {
@@ -225,6 +237,46 @@ export const confirmEmail = async (req, res) => {
     const values = [email];
     await pool.query(query, values);
     res.status(200).json({ message: "Succesfully confirmed email account" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const email = req.params.email;
+
+    const query = "SELECT password FROM users WHERE email = $1";
+    const values = [email];
+    let { rows } = await pool.query(query, values);
+    const password = rows[0].password;
+
+    const transporter = nodemailer.createTransport({
+      service: "hotmail",
+      auth: {
+        user: process.env.EMAIL_NAME,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_NAME,
+      to: process.env.RECEIVING_EMAIL, // replace this with email
+      subject: "Forgotten Password",
+      html: `<h1>Whoops! It seems like you have forgotten your password...</h1>
+      <p>It seems like you have forgotten your password. Below is your password.</p>
+      <h2> Your password is: ${password}</h2>
+      </div>`,
+    };
+
+    await transporter.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("Email sent: " + info.response);
+        res.status(200).json({ message: "Email sent" });
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

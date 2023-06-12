@@ -1,1 +1,2 @@
-forgot password controller
+forgot password controller with reset feature - need JWT, and create a form + implement hashed password using bcrypt
+customize resend confirmation email by giving parameter to the sendConfirmationEmail function`
