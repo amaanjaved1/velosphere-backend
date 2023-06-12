@@ -27,7 +27,7 @@ CREATE TABLE users (
     meIn4Tags3 VARCHAR(255) NULL,
     meIn4Tags4 VARCHAR(255) NULL,
     internTeam VARCHAR(255) NULL,
-    confirmed VARCHAR(255) NULL,
+    confirmed boolean DEFAULT false,
     PRIMARY KEY (id)
 );
 

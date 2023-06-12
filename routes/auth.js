@@ -1,14 +1,17 @@
 import express from "express";
-import { login, register, logout, confirmEmail } from "../controllers/auth.js";
-import { verifyToken } from "../middleware/auth.js";
+import {
+  login,
+  register,
+  resendConfirmationEmail,
+  confirmEmail,
+} from "../controllers/auth.js";
 
 // Creates a modular, mountable set of routes
 const router = express.Router();
 
 router.post("/login", login);
 router.post("/register", register);
-router.post("/logout", verifyToken, logout);
-// Create a waiting screen after registration, waiting for the user to confirm their email
-router.post("/confirm-email/:token", confirmEmail);
+router.post("/resend-confirmation-email", resendConfirmationEmail);
+router.get("/confirm-email/:token", confirmEmail);
 
 export default router;

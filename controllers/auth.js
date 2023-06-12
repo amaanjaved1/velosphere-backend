@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { pool } from "../db.js";
+import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -64,7 +65,7 @@ export const register = async (req, res) => {
     const passwordHash = await bcrypt.hash(password, salt);
 
     const registrationQuery =
-      "INSERT INTO users (username, password, firstname, lastname, email, studentprogram, company, internposition, educationalinstitution, schoolprogram, profilepicture, meinonesentence, studentlocation, twitter, linkedin, facebook, github, internteam, mein4tags1, mein4tags2, mein4tags3, mein4tags4, confirmed) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)";
+      "INSERT INTO users (username, password, firstname, lastname, email, studentprogram, company, internposition, educationalinstitution, schoolprogram, profilepicture, meinonesentence, studentlocation, twitter, linkedin, facebook, github, internteam, mein4tags1, mein4tags2, mein4tags3, mein4tags4) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)";
 
     const registrationValues = [
       username,
@@ -89,12 +90,21 @@ export const register = async (req, res) => {
       meIn4Tags3,
       meIn4Tags4,
       internTeam,
-      true,
     ];
 
     await pool.query(registrationQuery, registrationValues);
 
-    res.status(201).json({ message: "User registered" });
+    const payload = {
+      p_email: email,
+    };
+
+    // Payload prints fine here
+    await sendConfirmationEmail(req, res, payload);
+
+    res.status(201).json({
+      message:
+        "User succesfully registered. Please confirm your account by clicking the link in the email just sent. Thank you!",
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -105,8 +115,7 @@ export const login = async (req, res) => {
     // Retrieve username and password from the request body
     const { email, password } = req.body;
 
-    const query =
-      "SELECT password, confirmed, email, firstname, lastname, id, username FROM users WHERE email = $1";
+    const query = "SELECT * FROM users WHERE email = $1";
     const values = [email];
     let { rows } = await pool.query(query, values);
 
@@ -125,7 +134,10 @@ export const login = async (req, res) => {
 
     // If the user has not confirmed their email, send a 400 status code and a message saying that the user has not confirmed their email
     if (!quser.confirmed) {
-      return res.status(400).json({ message: "Please confirm email" });
+      return res.status(400).json({
+        message:
+          "Please confirm your email via the link sent to you to login. Thank you!",
+      });
     }
 
     var user = {
@@ -133,11 +145,11 @@ export const login = async (req, res) => {
       confirmed: quser.confirmed,
       id: quser.id,
       username: quser.username,
-      firstname: quser.firstname,
-      lastname: quser.lastname,
+      firstName: quser.firstname,
+      lastName: quser.lastname,
     };
 
-    const token = jwt.sign(user, process.env.JWT_SECRET);
+    const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: "7d" });
 
     res.status(200).json({ token });
   } catch (err) {
@@ -145,9 +157,56 @@ export const login = async (req, res) => {
   }
 };
 
-export const sendConfirmationEmail = async (req, res) => {
+export const resendConfirmationEmail = async (req, res) => {
   try {
-    // implementation here
+    // Retrieve the necessary data from the request, such as email and token
+    const { email } = req.body;
+
+    // Call the function responsible for sending the confirmation email
+    await sendConfirmationEmail(email);
+
+    // Send the response back to the client
+    res.status(200).json({ message: "Confirmation email resent successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const sendConfirmationEmail = async (req, res, payload) => {
+  try {
+    // Payload prints undefined here
+    let email = payload.p_email;
+    const token = jwt.sign(email, process.env.JWT_SECRET);
+
+    const transporter = nodemailer.createTransport({
+      service: "hotmail",
+      auth: {
+        user: process.env.EMAIL_NAME,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    let url = `http://localhost:5000/auth/confirm-email/${token}`;
+
+    const mailOptions = {
+      from: process.env.EMAIL_NAME,
+      to: process.env.RECEIVING_EMAIL,
+      subject: "Confirm your email",
+      html: `<h1>Email Confirmation</h1>
+      <h2>Hello ${email}</h2>
+      <p>Thank you for registering. Please confirm your email by clicking on the following link</p>
+      <a href="${url}">${url}</a>
+      </div>`,
+    };
+
+    await transporter.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("Email sent: " + info.response);
+        res.status(200).json({ message: "Email sent" });
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -155,15 +214,13 @@ export const sendConfirmationEmail = async (req, res) => {
 
 export const confirmEmail = async (req, res) => {
   try {
-    // implementation here
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+    const token = req.params.token;
+    const email = jwt.verify(token, process.env.JWT_SECRET);
 
-export const forgotPassword = async (req, res) => {
-  try {
-    // implementation here
+    const query = "UPDATE users SET confirmed = true WHERE email = $1";
+    const values = [email];
+    await pool.query(query, values);
+    res.status(200).json({ message: "Succesfully confirmed email account" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
