@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import { pool } from "./db.js";
 import authRoutes from "./routes/auth.js";
+import profileRoutes from "./routes/profile.js";
 import bodyParser from "body-parser";
 import morgan from "morgan";
 import helmet from "helmet";
@@ -47,6 +48,9 @@ app.use(express.json());
 
 // Create routes
 app.use("/auth", authRoutes);
+
+app.use("/profile", profileRoutes);
+
 app.get("/", (req, res) => {
   res.send("Hello World");
 });

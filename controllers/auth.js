@@ -30,6 +30,8 @@ export const register = async (req, res) => {
       meIn4Tags3,
       meIn4Tags4,
       internTeam,
+      currentTerm,
+      pastTerms,
     } = req.body;
 
     // Check to see if the user is already registered
@@ -61,8 +63,26 @@ export const register = async (req, res) => {
       return res.status(401).json({ message: "Invalid email" });
     }
 
+    // If the current term variable isn't in the format of "s23 or f23 or w23" etc. then return an error
+    if (!currentTerm.match(/^[sfw]\d{2}$/i)) {
+      return res.status(401).json({ message: "Invalid current term" });
+    }
+
+    // Past terms can either be null or in the format of a list of terms separated by commas (terms in the same format as above)
+    if (pastTerms !== null) {
+      const pastTermsList = pastTerms.split(",");
+      for (let i = 0; i < pastTermsList.length; i++) {
+        if (!pastTermsList[i].match(/^[sfw]\d{2}$/i)) {
+          return res.status(401).json({ message: "Invalid past terms" });
+        }
+      }
+    }
+
+    // Connections is meant to be an empty list of id's
+    const connections = [];
+
     const registrationQuery =
-      "INSERT INTO users (username, password, firstname, lastname, email, studentprogram, company, internposition, educationalinstitution, schoolprogram, profilepicture, meinonesentence, studentlocation, twitter, linkedin, facebook, github, internteam, mein4tags1, mein4tags2, mein4tags3, mein4tags4) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)";
+      "INSERT INTO users (username, password, firstname, lastname, email, studentprogram, company, internposition, educationalinstitution, schoolprogram, profilepicture, meinonesentence, studentlocation, twitter, linkedin, facebook, github, internteam, mein4tags1, mein4tags2, mein4tags3, mein4tags4, currentterm, pastterms, connections) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)";
 
     const registrationValues = [
       username,
@@ -87,6 +107,9 @@ export const register = async (req, res) => {
       meIn4Tags3,
       meIn4Tags4,
       internTeam,
+      currentTerm,
+      pastTerms,
+      connections,
     ];
 
     await pool.query(registrationQuery, registrationValues);

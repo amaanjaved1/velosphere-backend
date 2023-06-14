@@ -27,33 +27,18 @@ CREATE TABLE users (
     meIn4Tags3 VARCHAR(255) NULL,
     meIn4Tags4 VARCHAR(255) NULL,
     internTeam VARCHAR(255) NULL,
+    currentTerm VARCHAR(3) NOT NULL,
+    pastTerms VARCHAR(255) NULL,
     confirmed boolean DEFAULT false,
+    connections INT[] NOT NULL,
     PRIMARY KEY (id)
 );
 
-CREATE TABLE posts (
-  id SERIAL NOT NULL,
-  userId INT NOT NULL,
-  content VARCHAR(255) NOT NULL,
-  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
-);
-
-
 CREATE TABLE connections (
-  id SERIAL NOT NULL,
-  user1Id INT NOT NULL,
-  user2Id INT NOT NULL,
-  connectionStatus VARCHAR(255) NOT NULL,
-  connectedOn TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
+    id SERIAL NOT NULL,
+    user1 INT NOT NULL,
+    user2 INT NOT NULL,
+    cstate VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id)
 );
 
-CREATE TABLE comments (
-  id SERIAL NOT NULL,
-  postId INT NOT NULL,
-  userId INT NOT NULL,
-  content VARCHAR(255) NOT NULL,
-  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
-);
