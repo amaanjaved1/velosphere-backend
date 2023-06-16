@@ -1,5 +1,4 @@
 import express from "express";
-import { pool } from "../db.js";
 import { verifyToken } from "../middleware/auth.js";
 import {
   getProfileFull,

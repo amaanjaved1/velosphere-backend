@@ -38,7 +38,7 @@ CREATE TABLE connections (
     id SERIAL NOT NULL,
     user1 INT NOT NULL,
     user2 INT NOT NULL,
-    cstate VARCHAR(255) NOT NULL,
+    cstate VARCHAR(255) NOT NULL, -- pending, accepted
     PRIMARY KEY (id)
 );
 
