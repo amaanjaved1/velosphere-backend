@@ -7,9 +7,7 @@ export const viewRequests = async (req, res) => {
     const requestQuery =
       "SELECT * FROM connections WHERE (user1id=$1 OR user2id=$1) AND cstate='pending'";
     const requestValues = [email];
-    const requestResult = await pool.query(requestQuery, requestValues);
-
-    const { rows } = requestResult.rows;
+    const { rows } = await pool.query(requestQuery, requestValues);
 
     if (rows.length === 0) {
       res.status(404).json({ message: "No requests found" });
