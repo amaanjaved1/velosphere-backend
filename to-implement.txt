@@ -5,6 +5,7 @@ customize resend confirmation email by giving parameter to the sendConfirmationE
 Remove gmail from register function
 Change receiving email in auth mailoptions
 
+maybe migrate some of the profile controllers into requests controller?
 
 retest profile functions
 

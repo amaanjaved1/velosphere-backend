@@ -8,7 +8,8 @@ import {
   acceptConnection,
   denyConnection,
   cancelConnection,
-  connectionStatus,
+  getConnections,
+  viewRequests,
 } from "../controllers/profile.js";
 import { verifyOwner } from "../middleware/profile.js";
 
@@ -59,5 +60,15 @@ router.delete(
   verifyOwner,
   removeConnection
 );
+
+// Endpoint to get all of the connections of a user
+router.get(
+  "/view/connections/:email",
+  verifyToken,
+  verifyOwner,
+  getConnections
+);
+
+router.get("/view/requests/:email", verifyToken, verifyOwner, viewRequests);
 
 export default router;

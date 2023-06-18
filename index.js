@@ -4,9 +4,7 @@ import cors from "cors";
 import { pool } from "./db.js";
 import authRoutes from "./routes/auth.js";
 import profileRoutes from "./routes/profile.js";
-import mainRoutes from "./routes/main-search.js";
-import connectionRoutes from "./routes/connections.js";
-import requestsRoutes from "./routes/requests.js";
+import mainSearchRoutes from "./routes/main-search.js";
 import bodyParser from "body-parser";
 import morgan from "morgan";
 import helmet from "helmet";
@@ -50,15 +48,11 @@ app.use(cors());
 app.use(express.json());
 
 // Create routes
-app.use("/", mainRoutes);
+app.use("/search", mainSearchRoutes);
 
 app.use("/auth", authRoutes);
 
 app.use("/profile", profileRoutes);
-
-app.use("/connections", connectionRoutes);
-
-app.use("/requests", requestsRoutes);
 
 // Start the server
 app.listen(port, () => {

@@ -4,6 +4,6 @@ import { search } from "../controllers/main-search.js";
 
 const router = express.Router();
 
-router.get("/search/:filterBy/:content", verifyToken, search);
+router.get("/:searchBy/:filterBy/:content", verifyToken, search);
 
 export default router;

@@ -319,6 +319,66 @@ export const cancelConnection = async (req, res) => {
   }
 };
 
+export const getConnections = async (req, res) => {
+  try {
+    const email = req.params.email;
+    const actionFrom = req.body.actionFrom;
+
+    if (email !== actionFrom) {
+      return res
+        .status(401)
+        .json({ message: "Cannot get connections for another user" });
+    }
+
+    const emailQuery = "SELECT * FROM users WHERE email = $1";
+    const emailValues = [email];
+    const result = await pool.query(emailQuery, emailValues);
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ message: "User does not exist" });
+    }
+
+    const connectionQuery =
+      "SELECT * FROM connections WHERE (user1id=$1 OR user2id=$1) AND cstate='accepted'";
+    const connectionValues = [email];
+    const { rows } = await pool.query(connectionQuery, connectionValues);
+
+    res.status(200).json({ connections: rows });
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+};
+
+export const viewRequests = async (req, res) => {
+  try {
+    const email = req.params.email;
+    const actionFrom = req.body.actionFrom;
+
+    // Check to see if the user exists
+
+    const userQuery = "SELECT * FROM users WHERE email=$1";
+    const userValues = [email];
+    const userResult = await pool.query(userQuery, userValues);
+
+    if (userResult.rowCount === 0) {
+      res.status(404).json({ message: "User not found" });
+    }
+
+    if (email !== actionFrom) {
+      res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const requestQuery =
+      "SELECT * FROM connections WHERE (user1id=$1 OR user2id=$1) AND cstate='pending' AND NOT sentby=$1";
+    const requestValues = [email];
+    const { rows } = await pool.query(requestQuery, requestValues);
+
+    res.status(200).json({ requests: rows });
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+};
+
 export const connectionStatus = async (req, res, actionFrom, actionTo) => {
   try {
     const connectionQuery =
