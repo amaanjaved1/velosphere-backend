@@ -38,6 +38,7 @@ CREATE TABLE connections (
     user1id VARCHAR(255) NOT NULL, -- email
     user2id VARCHAR(255) NOT NULL, -- email
     cstate VARCHAR(255) NOT NULL, -- pending, accepted
+    sentby VARCHAR(255) NOT NULL, -- email
     PRIMARY KEY (id)
 );
 

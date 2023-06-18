@@ -109,12 +109,12 @@ export const sendConnection = async (req, res) => {
     // Check if connection already exists
     const cstate = await connectionStatus(req, res, actionFrom, actionTo);
 
-    if (cstate !== false) {
+    if (cstate[0] !== false) {
       return res.status(401).json({ message: "Connection already exists" });
     }
 
     // Create connection
-    const createConnectionQuery = `INSERT INTO connections (user1id, user2id, cstate) VALUES ($1, $2, $3)`;
+    const createConnectionQuery = `INSERT INTO connections (user1id, user2id, cstate, sentby) VALUES ($1, $2, $3, $1)`;
     const createConnectionValues = [actionFrom, actionTo, "pending"];
     await pool.query(createConnectionQuery, createConnectionValues);
 
@@ -147,13 +147,13 @@ export const removeConnection = async (req, res) => {
     // Check if connection exists
     const cstate = await connectionStatus(req, res, actionFrom, actionTo);
 
-    if (cstate === false) {
+    if (cstate[0] === false) {
       return res.status(401).json({ message: "Connection does not exist" });
     }
 
     // Check to see if connection is pending
 
-    if (cstate === "pending") {
+    if (cstate[0] === "pending") {
       return res
         .status(401)
         .json({ message: "Connection is pending, cannot remove" });
@@ -193,16 +193,22 @@ export const acceptConnection = async (req, res) => {
     // Check if connection exists
     const cstate = await connectionStatus(req, res, actionFrom, actionTo);
 
-    if (cstate === false) {
+    if (cstate[0] === false) {
       return res.status(401).json({ message: "Connection does not exist" });
     }
 
     // Check to see if connection is already accepted
 
-    if (cstate === "accepted") {
+    if (cstate[0] === "accepted") {
       return res
         .status(401)
         .json({ message: "Connection is already accepted" });
+    }
+
+    if (cstate[1] === actionFrom) {
+      return res
+        .status(401)
+        .json({ message: "Cannot accept your own request" });
     }
 
     // Accept connection
@@ -240,16 +246,20 @@ export const denyConnection = async (req, res) => {
     // Check if connection exists
     const cstate = await connectionStatus(req, res, actionFrom, actionTo);
 
-    if (cstate === false) {
+    if (cstate[0] === false) {
       return res.status(401).json({ message: "Connection does not exist" });
     }
 
     // Check to see if the connection is accepted
 
-    if (cstate === "accepted") {
+    if (cstate[0] === "accepted") {
       return res
         .status(401)
         .json({ message: "Connection is already accepted" });
+    }
+
+    if (cstate[1] === actionFrom) {
+      return res.status(401).json({ message: "Cannot deny your own request" });
     }
 
     // Deny connection
@@ -279,16 +289,22 @@ export const cancelConnection = async (req, res) => {
     // Check if connection request exists
     const cstate = await connectionStatus(req, res, actionFrom, actionTo);
 
-    if (cstate === false) {
+    if (cstate[0] === false) {
       return res.status(401).json({ message: "Connection does not exist" });
     }
 
     // Check to see if the connection is accepted
 
-    if (cstate === "accepted") {
+    if (cstate[0] === "accepted") {
       return res
         .status(401)
         .json({ message: "Connection is already accepted" });
+    }
+
+    if (cstate[1] !== actionFrom) {
+      return res
+        .status(401)
+        .json({ message: "Cannot cancel a connection you did not send" });
     }
 
     // Cancel connection
@@ -311,9 +327,9 @@ export const connectionStatus = async (req, res, actionFrom, actionTo) => {
     const { rows } = await pool.query(connectionQuery, connectionValues);
 
     if (rows.length === 0) {
-      return false;
+      return [false, false];
     } else {
-      return rows[0].cstate;
+      return [rows[0].cstate, rows[0].sentby];
     }
   } catch (err) {
     res.status(500).json({ error: err.message });

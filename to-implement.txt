@@ -3,6 +3,10 @@ customize resend confirmation email by giving parameter to the sendConfirmationE
 
 
 Remove gmail from register function
+Change receiving email in auth mailoptions
+
+
+retest profile functions
 
 amaanjaved2004@gmail.com = {
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFtYWFuamF2ZWQyMDA0QGdtYWlsLmNvbSIsImNvbmZpcm1lZCI6dHJ1ZSwiaWQiOjg3LCJ1c2VybmFtZSI6IkFtYWFuSmF2ZWQxMjMiLCJmaXJzdE5hbWUiOiJBbWFhbiIsImxhc3ROYW1lIjoiSmF2ZWQiLCJpYXQiOjE2ODcwMjQxMTcsImV4cCI6MTY4NzYyODkxN30.4k2d7iSaZcyWmdiWyNCvYAtFcojR1kBHgICi9zbky_s"
