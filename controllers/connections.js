@@ -1,6 +1,6 @@
 import { pool } from "../db.js";
 
-const getConnections = async (req, res) => {
+export const getConnections = async (req, res) => {
   try {
     const email = req.params.email;
 

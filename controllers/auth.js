@@ -52,7 +52,8 @@ export const register = async (req, res) => {
     if (
       emailCompany === "tangerine" ||
       emailCompany === "scotiabank" ||
-      emailCompany === "mdfinancial"
+      emailCompany === "mdfinancial" ||
+      emailCompany === "gmail"
     ) {
       match = true;
     } else {
@@ -68,21 +69,17 @@ export const register = async (req, res) => {
       return res.status(401).json({ message: "Invalid current term" });
     }
 
-    // Past terms can either be null or in the format of a list of terms separated by commas (terms in the same format as above)
-    if (pastTerms !== null) {
-      const pastTermsList = pastTerms.split(",");
-      for (let i = 0; i < pastTermsList.length; i++) {
-        if (!pastTermsList[i].match(/^[sfw]\d{2}$/i)) {
+    // Check to see if all the past terms elements have valid syntax
+    if (pastTerms.length !== 0) {
+      for (let date of pastTerms) {
+        if (!date.match(/^[sfw]\d{2}$/i)) {
           return res.status(401).json({ message: "Invalid past terms" });
         }
       }
     }
 
-    // Connections is meant to be an empty list of id's
-    const connections = [];
-
     const registrationQuery =
-      "INSERT INTO users (username, password, firstname, lastname, email, studentprogram, company, internposition, educationalinstitution, schoolprogram, profilepicture, meinonesentence, studentlocation, twitter, linkedin, facebook, github, internteam, mein4tags1, mein4tags2, mein4tags3, mein4tags4, currentterm, pastterms, connections) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)";
+      "INSERT INTO users (username, password, firstname, lastname, email, studentprogram, company, internposition, educationalinstitution, schoolprogram, profilepicture, meinonesentence, studentlocation, twitter, linkedin, facebook, github, internteam, mein4tags1, mein4tags2, mein4tags3, mein4tags4, currentterm, pastterms) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)";
 
     const registrationValues = [
       username,
@@ -109,7 +106,6 @@ export const register = async (req, res) => {
       internTeam,
       currentTerm,
       pastTerms,
-      connections,
     ];
 
     await pool.query(registrationQuery, registrationValues);

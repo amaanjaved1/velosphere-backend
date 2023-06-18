@@ -30,14 +30,13 @@ CREATE TABLE users (
     currentTerm VARCHAR(3) NOT NULL,
     pastTerms VARCHAR(255) NULL,
     confirmed boolean DEFAULT false,
-    connections INT[] NOT NULL,
     PRIMARY KEY (id)
 );
 
 CREATE TABLE connections (
     id SERIAL NOT NULL,
-    user1 INT NOT NULL,
-    user2 INT NOT NULL,
+    user1id VARCHAR(255) NOT NULL, -- email
+    user2id VARCHAR(255) NOT NULL, -- email
     cstate VARCHAR(255) NOT NULL, -- pending, accepted
     PRIMARY KEY (id)
 );

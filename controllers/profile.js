@@ -19,7 +19,7 @@ export const getProfileFull = async (req, res) => {
 
     let cstate = false;
 
-    if (isMyProfile) {
+    if (!isMyProfile) {
       const result = await connectionStatus(req, res, actionFrom, actionTo);
       cstate = result.cstate;
     }
@@ -61,23 +61,24 @@ export const updateProfile = async (req, res) => {
   try {
     const actionFrom = req.body.actionFrom;
     const actionTo = req.params.email;
+
     if (actionFrom !== actionTo) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
     const fieldsToUpdate = req.body.fieldsToUpdate;
 
-    let qstring = "";
-    const setClause = Object.keys(fieldsToUpdate).map((key, index) => {
-      qstring += `${key}=${fieldsToUpdate[key]}`;
-      if (index !== Object.keys(fieldsToUpdate).length - 1) {
-        string += ",";
-      }
-    });
+    const setClause = Object.keys(fieldsToUpdate)
+      .map((key, index) => {
+        return `${key} = $${index + 2}`; // Use numbered placeholders
+      })
+      .join(", ");
 
-    const updateQuery = `UPDATE users SET ${qstring} WHERE email = $1`;
-    const toUpdateValues = [actionTo];
-    await pool.query(updateQuery, toUpdateValues);
+    const updateQuery = `UPDATE users SET ${setClause} WHERE email = $1`;
+
+    const updateValues = [actionTo, ...Object.values(fieldsToUpdate)];
+
+    await pool.query(updateQuery, updateValues);
 
     res.status(200).json({ message: "Profile updated successfully" });
   } catch (err) {
@@ -106,19 +107,14 @@ export const sendConnection = async (req, res) => {
     }
 
     // Check if connection already exists
-    const connectionStatus = await connectionStatus(
-      req,
-      res,
-      actionFrom,
-      actionTo
-    );
+    const cstate = await connectionStatus(req, res, actionFrom, actionTo);
 
-    if (connectionStatus.cstate !== false) {
+    if (cstate !== false) {
       return res.status(401).json({ message: "Connection already exists" });
     }
 
     // Create connection
-    const createConnectionQuery = `INSERT INTO connections (user1, user2, cstate) VALUES ($1, $2, $3)`;
+    const createConnectionQuery = `INSERT INTO connections (user1id, user2id, cstate) VALUES ($1, $2, $3)`;
     const createConnectionValues = [actionFrom, actionTo, "pending"];
     await pool.query(createConnectionQuery, createConnectionValues);
 
@@ -149,27 +145,22 @@ export const removeConnection = async (req, res) => {
     }
 
     // Check if connection exists
-    const connectionStatus = await connectionStatus(
-      req,
-      res,
-      actionFrom,
-      actionTo
-    );
+    const cstate = await connectionStatus(req, res, actionFrom, actionTo);
 
-    if (connectionStatus.cstate === false) {
+    if (cstate === false) {
       return res.status(401).json({ message: "Connection does not exist" });
     }
 
     // Check to see if connection is pending
 
-    if (connectionStatus.cstate === "pending") {
+    if (cstate === "pending") {
       return res
         .status(401)
         .json({ message: "Connection is pending, cannot remove" });
     }
 
     // Remove connection
-    const removeConnectionQuery = `DELETE FROM connections WHERE (user1 = $1 AND user2 = $2) OR (user1 = $2 AND user2 = $1)`;
+    const removeConnectionQuery = `DELETE FROM connections WHERE (user1id = $1 AND user2id = $2) OR (user1id = $2 AND user2id = $1)`;
     const removeConnectionValues = [actionFrom, actionTo];
     await pool.query(removeConnectionQuery, removeConnectionValues);
 
@@ -200,20 +191,15 @@ export const acceptConnection = async (req, res) => {
     }
 
     // Check if connection exists
-    const connectionStatus = await connectionStatus(
-      req,
-      res,
-      actionFrom,
-      actionTo
-    );
+    const cstate = await connectionStatus(req, res, actionFrom, actionTo);
 
-    if (connectionStatus.cstate === false) {
+    if (cstate === false) {
       return res.status(401).json({ message: "Connection does not exist" });
     }
 
     // Check to see if connection is already accepted
 
-    if (connectionStatus.cstate === "accepted") {
+    if (cstate === "accepted") {
       return res
         .status(401)
         .json({ message: "Connection is already accepted" });
@@ -221,7 +207,7 @@ export const acceptConnection = async (req, res) => {
 
     // Accept connection
 
-    const acceptConnectionQuery = `UPDATE connections SET cstate = 'accepted' WHERE (user1 = $1 AND user2 = $2) OR (user1 = $2 AND user2 = $1)`;
+    const acceptConnectionQuery = `UPDATE connections SET cstate = 'accepted' WHERE (user1id = $1 AND user2id = $2) OR (user1id = $2 AND user2id = $1)`;
     const acceptConnectionValues = [actionFrom, actionTo];
     await pool.query(acceptConnectionQuery, acceptConnectionValues);
 
@@ -252,20 +238,15 @@ export const denyConnection = async (req, res) => {
     }
 
     // Check if connection exists
-    const connectionStatus = await connectionStatus(
-      req,
-      res,
-      actionFrom,
-      actionTo
-    );
+    const cstate = await connectionStatus(req, res, actionFrom, actionTo);
 
-    if (connectionStatus.cstate === false) {
+    if (cstate === false) {
       return res.status(401).json({ message: "Connection does not exist" });
     }
 
     // Check to see if the connection is accepted
 
-    if (connectionStatus.cstate === "accepted") {
+    if (cstate === "accepted") {
       return res
         .status(401)
         .json({ message: "Connection is already accepted" });
@@ -273,7 +254,7 @@ export const denyConnection = async (req, res) => {
 
     // Deny connection
 
-    const denyConnectionQuery = `DELETE FROM connections WHERE (user1 = $1 AND user2 = $2) OR (user1 = $2 AND user2 = $1)`;
+    const denyConnectionQuery = `DELETE FROM connections WHERE (user1id = $1 AND user2id = $2) OR (user1id = $2 AND user2id = $1)`;
     const denyConnectionValues = [actionFrom, actionTo];
     await pool.query(denyConnectionQuery, denyConnectionValues);
 
@@ -296,20 +277,15 @@ export const cancelConnection = async (req, res) => {
     }
 
     // Check if connection request exists
-    const connectionStatus = await connectionStatus(
-      req,
-      res,
-      actionFrom,
-      actionTo
-    );
+    const cstate = await connectionStatus(req, res, actionFrom, actionTo);
 
-    if (connectionStatus.cstate === false) {
+    if (cstate === false) {
       return res.status(401).json({ message: "Connection does not exist" });
     }
 
     // Check to see if the connection is accepted
 
-    if (connectionStatus.cstate === "accepted") {
+    if (cstate === "accepted") {
       return res
         .status(401)
         .json({ message: "Connection is already accepted" });
@@ -317,7 +293,7 @@ export const cancelConnection = async (req, res) => {
 
     // Cancel connection
 
-    const cancelConnectionQuery = `DELETE FROM connections WHERE (user1 = $1 AND user2 = $2) OR (user1 = $2 AND user2 = $1)`;
+    const cancelConnectionQuery = `DELETE FROM connections WHERE (user1id = $1 AND user2id = $2) OR (user1id = $2 AND user2id = $1)`;
     const cancelConnectionValues = [actionFrom, actionTo];
     await pool.query(cancelConnectionQuery, cancelConnectionValues);
 
@@ -330,14 +306,14 @@ export const cancelConnection = async (req, res) => {
 export const connectionStatus = async (req, res, actionFrom, actionTo) => {
   try {
     const connectionQuery =
-      "SELECT cstate FROM connections WHERE (user1=$1 AND user2=$2) OR (user1=$2 AND user2=$1)";
+      "SELECT * FROM connections WHERE (user1id=$1 AND user2id=$2) OR (user1id=$2 AND user2id=$1)";
     const connectionValues = [actionFrom, actionTo];
     const { rows } = await pool.query(connectionQuery, connectionValues);
 
     if (rows.length === 0) {
-      return res.status(401).json({ cstate: false });
+      return false;
     } else {
-      res.status(200).json({ cstate: rows[0].cstate });
+      return rows[0].cstate;
     }
   } catch (err) {
     res.status(500).json({ error: err.message });
