@@ -9,6 +9,8 @@ maybe migrate some of the profile controllers into requests controller?
 
 retest profile functions
 
+in register, user will not send pastterms
+
 amaanjaved2004@gmail.com = {
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFtYWFuamF2ZWQyMDA0QGdtYWlsLmNvbSIsImNvbmZpcm1lZCI6dHJ1ZSwiaWQiOjg3LCJ1c2VybmFtZSI6IkFtYWFuSmF2ZWQxMjMiLCJmaXJzdE5hbWUiOiJBbWFhbiIsImxhc3ROYW1lIjoiSmF2ZWQiLCJpYXQiOjE2ODcwMjQxMTcsImV4cCI6MTY4NzYyODkxN30.4k2d7iSaZcyWmdiWyNCvYAtFcojR1kBHgICi9zbky_s"
 }
