@@ -8,7 +8,7 @@ Change receiving email in auth mailoptions
 maybe migrate some of the profile controllers into requests controller?
 
 retest profile functions
-
+If the user doesn't confirm within 2 days, then delete the user
 in register, user will not send pastterms
 
 amaanjaved2004@gmail.com = {
