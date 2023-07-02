@@ -172,6 +172,7 @@ export const login = async (req, res) => {
     const expirationDate = new Date(today);
     expirationDate.setDate(today.getDate() + 7); // Add 7 days to today's date
 
+    // Send the information back to the frontend
     res.status(200).json({ token: token, expirationDate: expirationDate });
   } catch (err) {
     res.status(500).json({ error: err.message });
