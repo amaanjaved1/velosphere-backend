@@ -167,7 +167,12 @@ export const login = async (req, res) => {
 
     const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: "7d" });
 
-    res.status(200).json({ token });
+    const today = new Date(); // Get today's date
+
+    const expirationDate = new Date(today);
+    expirationDate.setDate(today.getDate() + 7); // Add 7 days to today's date
+
+    res.status(200).json({ token: token, expirationDate: expirationDate });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -184,6 +189,7 @@ export const resendConfirmationEmail = async (req, res) => {
     if (
       emailCompany === "tangerine" ||
       emailCompany === "scotiabank" ||
+      emailCompany === "gmail" ||
       emailCompany === "mdfinancial"
     ) {
       match = true;
@@ -230,7 +236,7 @@ export const sendConfirmationEmail = async (req, res, payload) => {
       subject: "Confirm your email",
       html: `<h1>Email Confirmation</h1>
     <h2>Hello ${email}</h2>
-    <p>Thank you for registering. Please confirm your email by clicking on the following link:</p>
+    <p>Thank you for registering. Please confirm your email by clicking the link below. Once you do so, your login will work:</p>
     <a href="${url}">${url}</a>`,
     };
 
@@ -263,7 +269,7 @@ export const confirmEmail = async (req, res) => {
 
 export const forgotPassword = async (req, res) => {
   try {
-    const email = req.params.email;
+    const { email } = req.body;
 
     const query = "SELECT password FROM users WHERE email = $1";
     const values = [email];
@@ -284,7 +290,7 @@ export const forgotPassword = async (req, res) => {
       subject: "Forgotten Password",
       html: `<h1>Whoops! It seems like you have forgotten your password...</h1>
       <p>It seems like you have forgotten your password. Below is your password.</p>
-      <h2> Your password is: ${password}</h2>
+      <h2>${password}</h2>
       </div>`,
     };
 

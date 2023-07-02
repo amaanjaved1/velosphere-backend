@@ -14,6 +14,6 @@ router.post("/login", login);
 router.post("/register", register);
 router.post("/resend-confirmation-email", resendConfirmationEmail);
 router.get("/confirm-email/:token", confirmEmail);
-router.post("/forgot-password/:email", forgotPassword);
+router.post("/forgot-password", forgotPassword);
 
 export default router;
