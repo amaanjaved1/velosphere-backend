@@ -26,7 +26,7 @@ router.get("/search/:searchBy/:content/:filterBy", verifyToken, (req, res) => {
   searchResults(req, res);
 });
 
-router.get("/connections/:email", (req, res) => {
+router.get("/connections/:email", verifyToken, verifyOwner, (req, res) => {
   const page = parseInt(req.query.page);
   const limit = parseInt(req.query.limit);
   req.query.page = page; // Assign the parsed value back to req.query
@@ -34,7 +34,7 @@ router.get("/connections/:email", (req, res) => {
   connectionResults(req, res);
 });
 
-router.get("/requests/:email", (req, res) => {
+router.get("/requests/:email", verifyToken, verifyOwner, (req, res) => {
   const page = parseInt(req.query.page);
   const limit = parseInt(req.query.limit);
   req.query.page = page; // Assign the parsed value back to req.query

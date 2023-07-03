@@ -8,7 +8,7 @@ export const connectionStatus = async (req, res, actionFrom, actionTo) => {
     const { rows } = await pool.query(connectionQuery, connectionValues);
 
     if (rows.length === 0) {
-      return [false, false];
+      return ["not connected", false];
     } else {
       return [rows[0].cstate, rows[0].sentby];
     }
@@ -38,7 +38,7 @@ export const getProfileFull = async (req, res) => {
 
     if (isMyProfile === false) {
       const result = await connectionStatus(req, res, actionFrom, actionTo);
-      cstate = result.cstate;
+      cstate = result[0];
     }
 
     const values = {

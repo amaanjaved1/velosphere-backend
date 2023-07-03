@@ -14,7 +14,7 @@ import {
 const router = express.Router();
 
 // Endpoint to get the full profile of a user
-router.post("/:email", verifyToken, verifyOwner, getProfileFull);
+router.post("/:email", verifyToken, getProfileFull);
 
 // Endpoint to update the profile of a user
 router.put("/:email", verifyToken, verifyOwner, updateProfile);
