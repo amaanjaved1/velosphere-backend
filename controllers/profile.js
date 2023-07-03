@@ -1,5 +1,22 @@
 import { pool } from "../db.js";
 
+export const connectionStatus = async (req, res, actionFrom, actionTo) => {
+  try {
+    const connectionQuery =
+      "SELECT * FROM connections WHERE (user1id=$1 AND user2id=$2) OR (user1id=$2 AND user2id=$1)";
+    const connectionValues = [actionFrom, actionTo];
+    const { rows } = await pool.query(connectionQuery, connectionValues);
+
+    if (rows.length === 0) {
+      return [false, false];
+    } else {
+      return [rows[0].cstate, rows[0].sentby];
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 export const getProfileFull = async (req, res) => {
   try {
     const actionFrom = req.body.actionFrom;
@@ -15,19 +32,19 @@ export const getProfileFull = async (req, res) => {
 
     const user = rows[0];
 
-    let isMyProfile = actionFrom === actionTo;
+    const isMyProfile = actionFrom === actionTo;
 
     let cstate = false;
 
-    if (!isMyProfile) {
+    if (isMyProfile === false) {
       const result = await connectionStatus(req, res, actionFrom, actionTo);
       cstate = result.cstate;
     }
 
     const values = {
       username: user.username,
-      firstName: user.first_name,
-      lastName: user.last_name,
+      firstName: user.firstname,
+      lastName: user.lastname,
       company: user.company,
       studentProgram: user.studentprogram,
       studentLocation: user.studentlocation,
@@ -39,10 +56,10 @@ export const getProfileFull = async (req, res) => {
       twitter: user.twitter,
       facebook: user.facebook,
       profilePicture: user.profilepicture,
-      meInFourTags1: user.meinfourtags1,
-      meInFourTags2: user.meinfourtags2,
-      meInFourTags3: user.meinfourtags3,
-      meInFourTags4: user.meinfourtags4,
+      meInFourTags1: user.mein4tags1,
+      meInFourTags2: user.mein4tags2,
+      meInFourTags3: user.mein4tags3,
+      meInFourTags4: user.mein4tags4,
       internPosition: user.internposition,
       internTeam: user.internteam,
       currentTerm: user.currentterm,
@@ -314,83 +331,6 @@ export const cancelConnection = async (req, res) => {
     await pool.query(cancelConnectionQuery, cancelConnectionValues);
 
     res.status(200).json({ message: "Connection cancelled successfully" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-export const getConnections = async (req, res) => {
-  try {
-    const email = req.params.email;
-    const actionFrom = req.body.actionFrom;
-
-    if (email !== actionFrom) {
-      return res
-        .status(401)
-        .json({ message: "Cannot get connections for another user" });
-    }
-
-    const emailQuery = "SELECT * FROM users WHERE email = $1";
-    const emailValues = [email];
-    const result = await pool.query(emailQuery, emailValues);
-
-    if (result.rows.length === 0) {
-      return res.status(401).json({ message: "User does not exist" });
-    }
-
-    const connectionQuery =
-      "SELECT * FROM connections WHERE (user1id=$1 OR user2id=$1) AND cstate='accepted'";
-    const connectionValues = [email];
-    const { rows } = await pool.query(connectionQuery, connectionValues);
-
-    res.status(200).json({ connections: rows });
-  } catch (err) {
-    res.status(500).json({ err: err.message });
-  }
-};
-
-export const viewRequests = async (req, res) => {
-  try {
-    const email = req.params.email;
-    const actionFrom = req.body.actionFrom;
-
-    // Check to see if the user exists
-
-    const userQuery = "SELECT * FROM users WHERE email=$1";
-    const userValues = [email];
-    const userResult = await pool.query(userQuery, userValues);
-
-    if (userResult.rowCount === 0) {
-      res.status(404).json({ message: "User not found" });
-    }
-
-    if (email !== actionFrom) {
-      res.status(403).json({ message: "Unauthorized" });
-    }
-
-    const requestQuery =
-      "SELECT * FROM connections WHERE (user1id=$1 OR user2id=$1) AND cstate='pending' AND NOT sentby=$1";
-    const requestValues = [email];
-    const { rows } = await pool.query(requestQuery, requestValues);
-
-    res.status(200).json({ requests: rows });
-  } catch (err) {
-    res.status(500).json({ err: err.message });
-  }
-};
-
-export const connectionStatus = async (req, res, actionFrom, actionTo) => {
-  try {
-    const connectionQuery =
-      "SELECT * FROM connections WHERE (user1id=$1 AND user2id=$2) OR (user1id=$2 AND user2id=$1)";
-    const connectionValues = [actionFrom, actionTo];
-    const { rows } = await pool.query(connectionQuery, connectionValues);
-
-    if (rows.length === 0) {
-      return [false, false];
-    } else {
-      return [rows[0].cstate, rows[0].sentby];
-    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

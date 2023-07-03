@@ -5,6 +5,8 @@ export const verifyToken = async (req, res, next) => {
     // Retrieve the token from the request's header
     let token = req.header("Authorization");
 
+    console.log("token: ", token);
+
     // If the token is falsy (empty or undefined)
     if (!token) {
       return res.status(403).send("Access Denied");

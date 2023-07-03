@@ -1,5 +1,6 @@
 import express from "express";
 import { verifyToken } from "../middleware/auth.js";
+import { verifyOwner } from "../middleware/profile.js";
 import {
   getProfileFull,
   updateProfile,
@@ -8,15 +9,12 @@ import {
   acceptConnection,
   denyConnection,
   cancelConnection,
-  getConnections,
-  viewRequests,
 } from "../controllers/profile.js";
-import { verifyOwner } from "../middleware/profile.js";
 
 const router = express.Router();
 
 // Endpoint to get the full profile of a user
-router.get("/:email", verifyToken, verifyOwner, getProfileFull);
+router.post("/:email", verifyToken, verifyOwner, getProfileFull);
 
 // Endpoint to update the profile of a user
 router.put("/:email", verifyToken, verifyOwner, updateProfile);
@@ -60,15 +58,5 @@ router.delete(
   verifyOwner,
   removeConnection
 );
-
-// Endpoint to get all of the connections of a user
-router.get(
-  "/view/connections/:email",
-  verifyToken,
-  verifyOwner,
-  getConnections
-);
-
-router.get("/view/requests/:email", verifyToken, verifyOwner, viewRequests);
 
 export default router;

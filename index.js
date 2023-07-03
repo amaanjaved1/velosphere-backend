@@ -1,10 +1,9 @@
 // Import modules
 import express from "express";
 import cors from "cors";
-import { pool } from "./db.js";
 import authRoutes from "./routes/auth.js";
 import profileRoutes from "./routes/profile.js";
-import mainSearchRoutes from "./routes/main-search.js";
+import queryRoutes from "./routes/query.js";
 import bodyParser from "body-parser";
 import morgan from "morgan";
 import helmet from "helmet";
@@ -48,11 +47,11 @@ app.use(cors());
 app.use(express.json());
 
 // Create routes
-app.use("/search", mainSearchRoutes);
-
 app.use("/auth", authRoutes);
 
 app.use("/profile", profileRoutes);
+
+app.use("/query", queryRoutes);
 
 // Start the server
 app.listen(port, () => {
