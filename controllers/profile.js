@@ -35,10 +35,12 @@ export const getProfileFull = async (req, res) => {
     const isMyProfile = actionFrom === actionTo;
 
     let cstate = false;
+    let sentby = false;
 
     if (isMyProfile === false) {
       const result = await connectionStatus(req, res, actionFrom, actionTo);
       cstate = result[0];
+      sentby = result[1];
     }
 
     const values = {
@@ -66,6 +68,7 @@ export const getProfileFull = async (req, res) => {
       pastTerms: user.pastterms,
       isMyProfile: isMyProfile,
       cstate: cstate,
+      sentby: sentby,
     };
 
     res.status(200).json(values);
