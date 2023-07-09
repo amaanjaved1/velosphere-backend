@@ -92,11 +92,14 @@ export const updateProfile = async (req, res) => {
       .map((key, index) => {
         return `${key}=$${index + 2}`; // Use numbered placeholders
       })
-      .join(", ");
+      .join(",");
 
-    const updateQuery = `UPDATE users SET ${setClause} WHERE email = $1`;
+    const updateQuery = `UPDATE users SET ${setClause} WHERE email=$1`;
 
     const updateValues = [actionTo, ...Object.values(fieldsToUpdate)];
+
+    console.log(updateQuery);
+    console.log(updateValues);
 
     await pool.query(updateQuery, updateValues);
 
