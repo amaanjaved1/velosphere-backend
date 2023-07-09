@@ -17,7 +17,7 @@ const router = express.Router();
 router.post("/:email", verifyToken, getProfileFull);
 
 // Endpoint to update the profile of a user
-router.put("/:email", verifyToken, verifyOwner, updateProfile);
+router.put("/update/:email", verifyToken, verifyOwner, updateProfile);
 
 // Endpoint to send a connection request
 router.post(

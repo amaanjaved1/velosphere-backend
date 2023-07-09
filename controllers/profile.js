@@ -90,7 +90,7 @@ export const updateProfile = async (req, res) => {
 
     const setClause = Object.keys(fieldsToUpdate)
       .map((key, index) => {
-        return `${key} = $${index + 2}`; // Use numbered placeholders
+        return `${key}=$${index + 2}`; // Use numbered placeholders
       })
       .join(", ");
 
@@ -129,7 +129,8 @@ export const sendConnection = async (req, res) => {
     // Check if connection already exists
     const cstate = await connectionStatus(req, res, actionFrom, actionTo);
 
-    if (cstate[0] !== false) {
+    console.log(cstate);
+    if (cstate[0] !== "not connected") {
       return res.status(401).json({ message: "Connection already exists" });
     }
 
