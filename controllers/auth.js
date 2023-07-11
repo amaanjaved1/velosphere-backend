@@ -78,12 +78,16 @@ export const register = async (req, res) => {
       }
     }
 
+    // Encrypt the password using bcrypt
+    const salt = await bcrypt.genSalt(10);
+    hashedPassword = await bcrypt.hash(password, salt);
+
     const registrationQuery =
       "INSERT INTO users (username, password, firstname, lastname, email, studentprogram, company, internposition, educationalinstitution, schoolprogram, profilepicture, meinonesentence, studentlocation, twitter, linkedin, facebook, github, internteam, mein4tags1, mein4tags2, mein4tags3, mein4tags4, currentterm, pastterms) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)";
 
     const registrationValues = [
       username,
-      password,
+      hashedPassword,
       firstName,
       lastName,
       email,
@@ -141,7 +145,9 @@ export const login = async (req, res) => {
 
     const quser = rows[0];
 
-    const isValidPassword = password === quser.password;
+    // Compared the password entered with the password in the database (the database password is hashed)
+
+    const isValidPassword = await bcrypt.compare(password, quser.password);
 
     // If the password is invalid, send a 400 status code and a message saying that the password is invalid
     if (!isValidPassword) {
@@ -259,7 +265,7 @@ export const confirmEmail = async (req, res) => {
     const token = req.params.token;
     const email = jwt.verify(token, process.env.JWT_SECRET);
 
-    const query = "UPDATE users SET confirmed = true WHERE email = $1";
+    const query = "UPDATE users SET confirmed=true WHERE email = $1";
     const values = [email];
     await pool.query(query, values);
     res.status(200).json({ message: "Succesfully confirmed email account" });
@@ -270,12 +276,29 @@ export const confirmEmail = async (req, res) => {
 
 export const forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, password } = req.body;
 
-    const query = "SELECT password FROM users WHERE email = $1";
+    // Check to see if the user exists
+    const query = "SELECT * FROM users WHERE email = $1";
     const values = [email];
     let { rows } = await pool.query(query, values);
-    const password = rows[0].password;
+
+    if (rows.length === 0) {
+      return res.status(400).json({ message: "Invalid email" });
+    }
+
+    // Encrypt the password using bcrypt
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create a token that has a payload which contains the user's email and their password
+
+    const token = jwt.sign(
+      { email: email, password: hashedPassword },
+      process.env.JWT_SECRET
+    );
+
+    let url = `http://localhost:5000/auth/confirm-password-change/${token}`;
 
     const transporter = nodemailer.createTransport({
       service: "hotmail",
@@ -290,9 +313,9 @@ export const forgotPassword = async (req, res) => {
       to: process.env.RECEIVING_EMAIL, // replace this with email
       subject: "Forgotten Password",
       html: `<h1>Whoops! It seems like you have forgotten your password...</h1>
-      <p>It seems like you have forgotten your password. Below is your password.</p>
-      <h2>${password}</h2>
-      </div>`,
+      <p>Please click the link below to apply the password change you requested.</p>
+      <p>Not you? Please ignore this email.</p>
+      <a href="${url}">${url}</a>`,
     };
 
     await transporter.sendMail(mailOptions, (err, info) => {
@@ -303,6 +326,22 @@ export const forgotPassword = async (req, res) => {
         res.status(200).json({ message: "Email sent" });
       }
     });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const confirmPasswordChange = async (req, res) => {
+  try {
+    const token = req.params.token;
+
+    // Get the email and the password from the payload
+    const { email, password } = jwt.verify(token, process.env.JWT_SECRET);
+
+    const query = "UPDATE users SET password=$2 WHERE email=$1";
+    const values = [email, password];
+    await pool.query(query, values);
+    res.status(200).json({ message: "Succesfully changed password" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
