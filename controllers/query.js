@@ -193,7 +193,6 @@ export const requestResults = async (req, res) => {
   const page = parseInt(req.query.page);
   const limit = parseInt(req.query.limit);
   const email = req.params.email;
-  const actionFrom = req.body.actionFrom;
 
   // Check to see if the user exists
 
@@ -203,10 +202,6 @@ export const requestResults = async (req, res) => {
 
   if (userResult.rowCount === 0) {
     res.status(404).json({ message: "User not found" });
-  }
-
-  if (email !== actionFrom) {
-    res.status(403).json({ message: "Unauthorized" });
   }
 
   const offset = (page - 1) * limit;
@@ -249,11 +244,11 @@ export const requestResults = async (req, res) => {
       };
     }
 
-    results.results = data;
+    results.content = data;
 
     results.totalPages = Math.ceil(totalCount / limit);
 
-    res.status(200).json(results);
+    res.status(200).json({ results: results });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }

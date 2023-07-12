@@ -6,7 +6,6 @@ import {
   requestResults,
 } from "../controllers/query.js";
 import { verifyToken } from "../middleware/auth.js";
-import { verifyOwner } from "../middleware/profile.js";
 
 const router = express.Router();
 
@@ -26,7 +25,7 @@ router.get("/search/:searchBy/:content/:filterBy", verifyToken, (req, res) => {
   searchResults(req, res);
 });
 
-router.get("/connections/:email", verifyToken, verifyOwner, (req, res) => {
+router.get("/connections/:email", verifyToken, (req, res) => {
   const page = parseInt(req.query.page);
   const limit = parseInt(req.query.limit);
   req.query.page = page; // Assign the parsed value back to req.query
@@ -34,7 +33,7 @@ router.get("/connections/:email", verifyToken, verifyOwner, (req, res) => {
   connectionResults(req, res);
 });
 
-router.get("/requests/:email", verifyToken, verifyOwner, (req, res) => {
+router.get("/requests/:email", verifyToken, (req, res) => {
   const page = parseInt(req.query.page);
   const limit = parseInt(req.query.limit);
   req.query.page = page; // Assign the parsed value back to req.query
