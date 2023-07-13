@@ -80,7 +80,7 @@ export const register = async (req, res) => {
 
     // Encrypt the password using bcrypt
     const salt = await bcrypt.genSalt(10);
-    hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const registrationQuery =
       "INSERT INTO users (username, password, firstname, lastname, email, studentprogram, company, internposition, educationalinstitution, schoolprogram, profilepicture, meinonesentence, studentlocation, twitter, linkedin, facebook, github, internteam, mein4tags1, mein4tags2, mein4tags3, mein4tags4, currentterm, pastterms) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)";
