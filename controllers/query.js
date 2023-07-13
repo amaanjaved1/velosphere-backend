@@ -51,49 +51,31 @@ export const searchResults = async (req, res) => {
     const offset = (page - 1) * limit;
 
     const searchBy = req.params.searchBy;
-    const filterBy = "null";
     const content = req.params.content;
     const results = {};
 
     let searchQuery = `
-      SELECT * FROM users
-      WHERE ${searchBy} LIKE $1 AND currentTerm = $2
-      LIMIT $3 OFFSET $4;
-    `;
+  SELECT * FROM users
+  WHERE ${searchBy} LIKE '%' || $1 || '%'
+  LIMIT $2 OFFSET $3;
+`;
 
-    let searchValues = [`%${content}%`, filterBy, limit, offset];
-
-    if (filterBy === "null") {
-      searchQuery = `
-        SELECT * FROM users
-        WHERE ${searchBy} LIKE $1
-        LIMIT $2 OFFSET $3;
-        `;
-      searchValues = [`%${content}%`, limit, offset];
-    }
+    let searchValues = [content, limit, offset];
 
     const { rows } = await pool.query(searchQuery, searchValues);
 
-    if (rows.length === 0) {
-      res.status(404).json({ message: "No users found" });
-    }
-
     let totalCountQuery = `
-        SELECT COUNT(*) FROM users
-        WHERE ${searchBy} LIKE $1 AND currentTerm = $2;
-        `;
-    let totalCountValues = [`%${content}%`, filterBy];
+  SELECT COUNT(*) FROM users
+  WHERE ${searchBy} LIKE '%' || $1 || '%';
+`;
 
-    if (filterBy === "null") {
-      totalCountQuery = `SELECT COUNT(*) FROM users
-        WHERE ${searchBy} LIKE $1;`;
-      totalCountValues = [`%${content}%`];
-    }
+    let totalCountValues = [content];
 
     const totalCountResult = await pool.query(
       totalCountQuery,
       totalCountValues
     );
+
     const totalCount = parseInt(totalCountResult.rows[0].count);
 
     if (offset + limit < totalCount) {
