@@ -123,13 +123,6 @@ export const connectionResults = async (req, res) => {
   const page = parseInt(req.query.page);
   const limit = parseInt(req.query.limit);
   const email = req.params.email;
-  const actionFrom = req.body.actionFrom;
-
-  if (email !== actionFrom) {
-    return res
-      .status(401)
-      .json({ message: "Cannot get connections for another user" });
-  }
 
   // Check to see if the user exists
   const emailQuery = "SELECT * FROM users WHERE email = $1";
@@ -179,11 +172,11 @@ export const connectionResults = async (req, res) => {
       };
     }
 
-    results.results = data;
+    results.content = data;
 
     results.totalPages = Math.ceil(totalCount / limit);
 
-    res.status(200).json(results);
+    res.status(200).json({ results: results });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
