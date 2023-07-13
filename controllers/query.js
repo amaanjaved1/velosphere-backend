@@ -1,7 +1,7 @@
 import { pool } from "../db.js";
-import { connectionStatus } from "./profile.js";
 
 export const mainResults = async (req, res) => {
+  console.log("hit");
   const page = parseInt(req.query.page);
   const limit = parseInt(req.query.limit);
 
@@ -14,7 +14,8 @@ export const mainResults = async (req, res) => {
     const totalCountResult = await pool.query(totalCountQuery);
     const totalCount = parseInt(totalCountResult.rows[0].count);
 
-    const dataQuery = "SELECT * FROM users LIMIT $1 OFFSET $2;";
+    const dataQuery =
+      "SELECT profilePicture, company, currentterm, firstname, lastname, studentprogram, studentlocation, educationalinstitution, email FROM users LIMIT $1 OFFSET $2;";
     const dataParams = [limit, offset];
     const dataResult = await pool.query(dataQuery, dataParams);
     const data = dataResult.rows;
@@ -33,11 +34,11 @@ export const mainResults = async (req, res) => {
       };
     }
 
-    results.results = data;
+    results.content = data;
 
     results.totalPages = Math.ceil(totalCount / limit);
 
-    res.status(200).json(results);
+    res.status(200).json({ results: results });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
@@ -50,7 +51,7 @@ export const searchResults = async (req, res) => {
     const offset = (page - 1) * limit;
 
     const searchBy = req.params.searchBy;
-    const filterBy = req.params.filterBy;
+    const filterBy = "null";
     const content = req.params.content;
     const results = {};
 
@@ -109,11 +110,11 @@ export const searchResults = async (req, res) => {
       };
     }
 
-    results.results = rows;
+    results.content = rows;
 
     results.totalPages = Math.ceil(totalCount / limit);
 
-    res.status(200).json(results);
+    res.status(200).json({ results: results });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

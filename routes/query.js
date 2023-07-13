@@ -17,7 +17,7 @@ router.get("/main", verifyToken, (req, res) => {
   mainResults(req, res);
 });
 
-router.get("/search/:searchBy/:content/:filterBy", verifyToken, (req, res) => {
+router.get("/search/:searchBy/:content", verifyToken, (req, res) => {
   const page = parseInt(req.query.page);
   const limit = parseInt(req.query.limit);
   req.query.page = page; // Assign the parsed value back to req.query
