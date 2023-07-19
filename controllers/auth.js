@@ -171,7 +171,7 @@ export const login = async (req, res) => {
       lastName: quser.lastname,
     };
 
-    const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: "8d" });
+    const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: "14d" });
 
     const today = new Date(); // Get today's date
 

@@ -54,22 +54,24 @@ export const searchResults = async (req, res) => {
     const content = req.params.content;
     const results = {};
 
+    console.log(searchBy);
+
     let searchQuery = `
   SELECT * FROM users
-  WHERE ${searchBy} LIKE '%' || $1 || '%'
-  LIMIT $2 OFFSET $3;
+  WHERE LOWER(${searchBy}) LIKE ('%${content}%')
+  LIMIT $1 OFFSET $2;
 `;
 
-    let searchValues = [content, limit, offset];
+    let searchValues = [limit, offset];
 
     const { rows } = await pool.query(searchQuery, searchValues);
 
     let totalCountQuery = `
   SELECT COUNT(*) FROM users
-  WHERE ${searchBy} LIKE '%' || $1 || '%';
+  WHERE LOWER(${searchBy}) LIKE ('%${content}%');
 `;
 
-    let totalCountValues = [content];
+    let totalCountValues = [];
 
     const totalCountResult = await pool.query(
       totalCountQuery,
