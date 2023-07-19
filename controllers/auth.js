@@ -52,8 +52,7 @@ export const register = async (req, res) => {
     if (
       emailCompany === "tangerine" ||
       emailCompany === "scotiabank" ||
-      emailCompany === "mdfinancial" ||
-      emailCompany === "gmail"
+      emailCompany === "mdfinancial"
     ) {
       match = true;
     } else {
@@ -196,7 +195,6 @@ export const resendConfirmationEmail = async (req, res) => {
     if (
       emailCompany === "tangerine" ||
       emailCompany === "scotiabank" ||
-      emailCompany === "gmail" ||
       emailCompany === "mdfinancial"
     ) {
       match = true;
@@ -235,11 +233,11 @@ export const sendConfirmationEmail = async (req, res, payload) => {
       },
     });
 
-    let url = `http://localhost:5000/auth/confirm-email/${token}`;
+    let url = `${process.env.BACKEND_SERVER_NAME}/auth/confirm-email/${token}`;
 
     const mailOptions = {
       from: process.env.EMAIL_NAME,
-      to: process.env.RECEIVING_EMAIL,
+      to: email,
       subject: "Confirm your email",
       html: `<h1>Email Confirmation</h1>
     <h2>Hello ${email}</h2>
@@ -298,7 +296,7 @@ export const forgotPassword = async (req, res) => {
       process.env.JWT_SECRET
     );
 
-    let url = `http://localhost:5000/auth/confirm-password-change/${token}`;
+    let url = `${process.env.BACKEND_SERVER_NAME}/auth/confirm-password-change/${token}`;
 
     const transporter = nodemailer.createTransport({
       service: "hotmail",
@@ -310,7 +308,7 @@ export const forgotPassword = async (req, res) => {
 
     const mailOptions = {
       from: process.env.EMAIL_NAME,
-      to: process.env.RECEIVING_EMAIL, // replace this with email
+      to: email,
       subject: "Forgotten Password",
       html: `<h1>Whoops! It seems like you have forgotten your password...</h1>
       <p>Please click the link below to apply the password change you requested.</p>
