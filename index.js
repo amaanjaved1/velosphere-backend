@@ -53,6 +53,10 @@ app.use("/profile", profileRoutes);
 
 app.use("/query", queryRoutes);
 
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
 // Start the server
 app.listen(port, () => {
   console.log("Server has started");
