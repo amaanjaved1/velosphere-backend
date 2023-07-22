@@ -7,13 +7,17 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Create a new pool instance
+// // Create a new pool instance
+// export const pool = new Pool({
+//   user: process.env.DB_USER,
+//   password: process.env.DB_PASSWORD,
+//   host: process.env.DB_HOST,
+//   port: process.env.DB_PORT,
+//   database: process.env.PGDATABASE,
+// });
+
 export const pool = new Pool({
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  host: "localhost",
-  port: 5432,
-  database: "velospheredb",
+  connectionString: process.env.CONNECTION_STRING,
 });
 
 // If you wanted to create another pool, you can do so below
