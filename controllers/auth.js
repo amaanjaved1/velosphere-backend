@@ -191,7 +191,7 @@ export const resendConfirmationEmail = async (req, res) => {
     // Retrieve the necessary data from the request, such as email and token
     const { email, commEmail } = req.body;
 
-    const emailCompany = commEmail.split("@")[1].split(".")[0];
+    const emailCompany = email.split("@")[1].split(".")[0];
     let match;
 
     if (
@@ -279,14 +279,20 @@ export const confirmEmail = async (req, res) => {
 
 export const forgotPassword = async (req, res) => {
   try {
-    const { email, commEmail, password } = req.body;
+    const { email, password } = req.body;
 
     // Check to see if the user exists
     const query = "SELECT * FROM users WHERE email = $1";
     const values = [email];
     let { rows } = await pool.query(query, values);
 
-    user = rows[0];
+    if (rows.length === 0) {
+      return res.status(400).json({ message: "Invalid email" });
+    }
+
+    const user = rows[0];
+
+    const commEmail = user.commemail;
 
     if (rows.length === 0) {
       return res.status(400).json({ message: "Invalid email" });
