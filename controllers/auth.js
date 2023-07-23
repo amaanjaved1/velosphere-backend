@@ -174,6 +174,8 @@ export const login = async (req, res) => {
 
     const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: "14d" });
 
+    console.log(token);
+
     const today = new Date(); // Get today's date
 
     const expirationDate = new Date(today);
