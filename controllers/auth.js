@@ -32,10 +32,10 @@ export const register = async (req, res) => {
       internTeam,
       currentTerm,
       pastTerms,
+      commEmail,
     } = req.body;
 
     // Check to see if the user is already registered
-
     const emailQuery = "SELECT * FROM users WHERE email = $1";
     const emailValues = [email];
     const { rows } = await pool.query(emailQuery, emailValues);
@@ -82,7 +82,7 @@ export const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const registrationQuery =
-      "INSERT INTO users (username, password, firstname, lastname, email, studentprogram, company, internposition, educationalinstitution, schoolprogram, profilepicture, meinonesentence, studentlocation, twitter, linkedin, facebook, github, internteam, mein4tags1, mein4tags2, mein4tags3, mein4tags4, currentterm, pastterms) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)";
+      "INSERT INTO users (username, password, firstname, lastname, email, studentprogram, company, internposition, educationalinstitution, schoolprogram, profilepicture, meinonesentence, studentlocation, twitter, linkedin, facebook, github, internteam, mein4tags1, mein4tags2, mein4tags3, mein4tags4, currentterm, pastterms, commEmail) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)";
 
     const registrationValues = [
       username,
@@ -109,12 +109,14 @@ export const register = async (req, res) => {
       internTeam,
       currentTerm,
       pastTerms,
+      commEmail,
     ];
 
     await pool.query(registrationQuery, registrationValues);
 
     const payload = {
-      p_email: email,
+      email: email,
+      commEmail: commEmail,
     };
 
     // Payload prints fine here
@@ -187,9 +189,9 @@ export const login = async (req, res) => {
 export const resendConfirmationEmail = async (req, res) => {
   try {
     // Retrieve the necessary data from the request, such as email and token
-    const { email } = req.body;
+    const { email, commEmail } = req.body;
 
-    const emailCompany = email.split("@")[1].split(".")[0];
+    const emailCompany = commEmail.split("@")[1].split(".")[0];
     let match;
 
     if (
@@ -207,7 +209,8 @@ export const resendConfirmationEmail = async (req, res) => {
     }
 
     const payload = {
-      p_email: email,
+      email: email,
+      commEmail: commEmail,
     };
 
     // Call the function responsible for sending the confirmation email
@@ -222,7 +225,9 @@ export const resendConfirmationEmail = async (req, res) => {
 
 export const sendConfirmationEmail = async (req, res, payload) => {
   try {
-    let email = payload.p_email;
+    let email = payload.email;
+    let commEmail = payload.commEmail;
+
     const token = jwt.sign(email, process.env.JWT_SECRET);
 
     const transporter = nodemailer.createTransport({
@@ -237,7 +242,7 @@ export const sendConfirmationEmail = async (req, res, payload) => {
 
     const mailOptions = {
       from: process.env.EMAIL_NAME,
-      to: email,
+      to: commEmail,
       subject: "Confirm your email",
       html: `<h1>Email Confirmation</h1>
     <h2>Hello ${email}</h2>
@@ -274,12 +279,14 @@ export const confirmEmail = async (req, res) => {
 
 export const forgotPassword = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, commEmail, password } = req.body;
 
     // Check to see if the user exists
     const query = "SELECT * FROM users WHERE email = $1";
     const values = [email];
     let { rows } = await pool.query(query, values);
+
+    user = rows[0];
 
     if (rows.length === 0) {
       return res.status(400).json({ message: "Invalid email" });
@@ -308,7 +315,7 @@ export const forgotPassword = async (req, res) => {
 
     const mailOptions = {
       from: process.env.EMAIL_NAME,
-      to: email,
+      to: commEmail,
       subject: "Forgotten Password",
       html: `<h1>Whoops! It seems like you have forgotten your password...</h1>
       <p>Please click the link below to apply the password change you requested.</p>
