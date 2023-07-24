@@ -102,11 +102,11 @@ export const register = async (req, res) => {
       linkedIn,
       facebook,
       github,
+      internTeam,
       meIn4Tags1,
       meIn4Tags2,
       meIn4Tags3,
       meIn4Tags4,
-      internTeam,
       currentTerm,
       pastTerms,
       commEmail,
@@ -173,8 +173,6 @@ export const login = async (req, res) => {
     };
 
     const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: "14d" });
-
-    console.log(token);
 
     const today = new Date(); // Get today's date
 
