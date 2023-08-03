@@ -1,7 +1,6 @@
 import { pool } from "../db.js";
 
 export const mainResults = async (req, res) => {
-  console.log("hit");
   const page = parseInt(req.query.page);
   const limit = parseInt(req.query.limit);
 
@@ -15,7 +14,7 @@ export const mainResults = async (req, res) => {
     const totalCount = parseInt(totalCountResult.rows[0].count);
 
     const dataQuery =
-      "SELECT profilePicture, company, currentterm, firstname, lastname, studentprogram, studentlocation, educationalinstitution, email FROM users LIMIT $1 OFFSET $2;";
+      "SELECT internposition, company, currentterm, firstname, lastname, studentprogram, studentlocation, educationalinstitution, email FROM users LIMIT $1 OFFSET $2;";
     const dataParams = [limit, offset];
     const dataResult = await pool.query(dataQuery, dataParams);
     const data = dataResult.rows;

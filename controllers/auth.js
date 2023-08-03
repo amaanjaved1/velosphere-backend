@@ -18,10 +18,8 @@ export const register = async (req, res) => {
       internPosition,
       educationalInstitution,
       schoolProgram,
-      profilePicture,
       meInOneSentence,
       studentLocation,
-      twitter,
       linkedIn,
       facebook,
       github,
@@ -82,7 +80,7 @@ export const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const registrationQuery =
-      "INSERT INTO users (username, password, firstname, lastname, email, studentprogram, company, internposition, educationalinstitution, schoolprogram, profilepicture, meinonesentence, studentlocation, twitter, linkedin, facebook, github, internteam, mein4tags1, mein4tags2, mein4tags3, mein4tags4, currentterm, pastterms, commEmail) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)";
+      "INSERT INTO users (username, password, firstname, lastname, email, studentprogram, company, internposition, educationalinstitution, schoolprogram, meinonesentence, studentlocation, linkedin, facebook, github, internteam, mein4tags1, mein4tags2, mein4tags3, mein4tags4, currentterm, pastterms, commEmail) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)";
 
     const registrationValues = [
       username,
@@ -95,10 +93,8 @@ export const register = async (req, res) => {
       internPosition,
       educationalInstitution,
       schoolProgram,
-      profilePicture,
       meInOneSentence,
       studentLocation,
-      twitter,
       linkedIn,
       facebook,
       github,
@@ -159,7 +155,7 @@ export const login = async (req, res) => {
     if (!quser.confirmed) {
       return res.status(400).json({
         message:
-          "Please confirm your email via the link sent to you to login. Thank you!",
+          "Please confirm your email via the link sent to you to login. If you haven't received one yet, please use the option below",
       });
     }
 
@@ -271,7 +267,10 @@ export const confirmEmail = async (req, res) => {
     const query = "UPDATE users SET confirmed=true WHERE email = $1";
     const values = [email];
     await pool.query(query, values);
-    res.status(200).json({ message: "Succesfully confirmed email account" });
+    res.status(200).json({
+      message:
+        "Succesfully confirmed email account. Please navigate to https://velosphere.onrender.com/",
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
