@@ -1,51 +1,7 @@
 import { pool } from "../db.js";
-// import { redisClient } from "../index.js";
+import { redisClient } from "../index.js";
 
-const DEFAULT_EXPIRATION = 1200;
-
-export const mainResults = async (req, res) => {
-  const page = parseInt(req.query.page);
-  const limit = parseInt(req.query.limit);
-
-  const offset = (page - 1) * limit;
-
-  const results = {};
-
-  try {
-    const totalCountQuery = "SELECT COUNT(*) FROM users;";
-    const totalCountResult = await pool.query(totalCountQuery);
-    const totalCount = parseInt(totalCountResult.rows[0].count);
-
-    const dataQuery =
-      "SELECT internposition, company, currentterm, firstname, lastname, studentprogram, studentlocation, educationalinstitution, email FROM users LIMIT $1 OFFSET $2;";
-    const dataParams = [limit, offset];
-    const dataResult = await pool.query(dataQuery, dataParams);
-    const data = dataResult.rows;
-
-    if (offset + limit < totalCount) {
-      results.next = {
-        page: page + 1,
-        limit: limit,
-      };
-    }
-
-    if (offset > 0) {
-      results.previous = {
-        page: page - 1,
-        limit: limit,
-      };
-    }
-
-    results.content = data;
-
-    results.totalPages = Math.ceil(totalCount / limit);
-
-    res.status(200).json({ results: results });
-  } catch (e) {
-    res.status(500).json({ message: e.message });
-  }
-};
-
+const DEFAULT_EXPIRATION = 1800;
 export const searchResults = async (req, res) => {
   try {
     const page = parseInt(req.query.page);

@@ -1,6 +1,5 @@
 import express from "express";
 import {
-  mainResults,
   searchResults,
   connectionResults,
   requestResults,
@@ -10,7 +9,7 @@ import { verifyToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.get("/main", verifyToken, (req, res) => {
+router.get("/mainreg", (req, res) => {
   const page = parseInt(req.query.page);
   const limit = parseInt(req.query.limit);
   req.query.page = page; // Assign the parsed value back to req.query
@@ -42,12 +41,12 @@ router.get("/requests/:email", verifyToken, (req, res) => {
   requestResults(req, res);
 });
 
-// router.get("/main", (req, res) => {
-//   const page = parseInt(req.query.page);
-//   const limit = parseInt(req.query.limit);
-//   req.query.page = page; // Assign the parsed value back to req.query
-//   req.query.limit = limit; // Assign the parsed value back to req.query
-//   mainResultsCached(req, res);
-// });
+router.get("/main", (req, res) => {
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
+  req.query.page = page; // Assign the parsed value back to req.query
+  req.query.limit = limit; // Assign the parsed value back to req.query
+  mainResultsCached(req, res);
+});
 
 export default router;
