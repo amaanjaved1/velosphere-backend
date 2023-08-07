@@ -1,5 +1,5 @@
 import { pool } from "../db.js";
-import { redisClient } from "../index.js";
+// import { redisClient } from "../index.js";
 
 const DEFAULT_EXPIRATION = 1200;
 
