@@ -29,7 +29,6 @@ export const register = async (req, res) => {
       meIn4Tags4,
       internTeam,
       currentTerm,
-      pastTerms,
       commEmail,
     } = req.body;
 
@@ -66,18 +65,11 @@ export const register = async (req, res) => {
       return res.status(401).json({ message: "Invalid current term" });
     }
 
-    // Check to see if all the past terms elements have valid syntax
-    if (pastTerms.length !== 0) {
-      for (let date of pastTerms) {
-        if (!date.match(/^[sfw]\d{2}$/i)) {
-          return res.status(401).json({ message: "Invalid past terms" });
-        }
-      }
-    }
-
     // Encrypt the password using bcrypt
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+
+    const pastterms = "";
 
     const registrationQuery =
       "INSERT INTO users (username, password, firstname, lastname, email, studentprogram, company, internposition, educationalinstitution, schoolprogram, meinonesentence, studentlocation, linkedin, facebook, github, internteam, mein4tags1, mein4tags2, mein4tags3, mein4tags4, currentterm, pastterms, commEmail) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)";
@@ -104,7 +96,7 @@ export const register = async (req, res) => {
       meIn4Tags3,
       meIn4Tags4,
       currentTerm,
-      pastTerms,
+      pastterms,
       commEmail,
     ];
 

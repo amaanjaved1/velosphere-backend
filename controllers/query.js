@@ -1,4 +1,7 @@
 import { pool } from "../db.js";
+import { redisClient } from "../index.js";
+
+const DEFAULT_EXPIRATION = 1200;
 
 export const mainResults = async (req, res) => {
   const page = parseInt(req.query.page);
@@ -220,6 +223,88 @@ export const requestResults = async (req, res) => {
         limit: limit,
       };
     }
+
+    results.content = data;
+
+    results.totalPages = Math.ceil(totalCount / limit);
+
+    res.status(200).json({ results: results });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
+
+const getCountResults = () => {
+  return new Promise((resolve, reject) => {
+    redisClient.get("countResults", (error, data) => {
+      if (error) {
+        console.error(error);
+        reject(error);
+      } else {
+        resolve(parseInt(data) || 0);
+      }
+    });
+  });
+};
+
+export const mainResultsCached = async (req, res) => {
+  try {
+    const cachedData = await new Promise((resolve, reject) => {
+      redisClient.get("mainResults", (error, data) => {
+        if (error) {
+          console.error(error);
+          reject(error);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+
+    let queryData = {};
+
+    if (cachedData != null) {
+      queryData = JSON.parse(cachedData);
+    } else {
+      const dataQuery =
+        "SELECT internposition, company, currentterm, firstname, lastname, studentprogram, studentlocation, educationalinstitution, email FROM users;";
+      const dataParams = [];
+      const dataResult = await pool.query(dataQuery, dataParams);
+      const results = dataResult.rows;
+      redisClient.setex(
+        "mainResults",
+        DEFAULT_EXPIRATION,
+        JSON.stringify(results)
+      );
+      redisClient.setex("countResults", DEFAULT_EXPIRATION, results.length);
+      queryData = results;
+      totalCount = results.length;
+    }
+
+    const totalCount = await getCountResults();
+
+    let results = {};
+
+    const page = parseInt(req.query.page);
+    const limit = parseInt(req.query.limit);
+    let offset = (page - 1) * limit;
+
+    if (offset + limit < totalCount) {
+      results.next = {
+        page: page + 1,
+        limit: limit,
+      };
+    }
+
+    if (offset > 0) {
+      results.previous = {
+        page: page - 1,
+        limit: limit,
+      };
+    }
+
+    // Get data
+
+    const data = queryData.slice(offset, offset + limit);
 
     results.content = data;
 

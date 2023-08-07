@@ -96,9 +96,6 @@ export const updateProfile = async (req, res) => {
 
     const updateValues = [actionTo, ...Object.values(fieldsToUpdate)];
 
-    console.log(updateQuery);
-    console.log(updateValues);
-
     await pool.query(updateQuery, updateValues);
 
     res.status(200).json({ message: "Profile updated successfully" });

@@ -9,6 +9,20 @@ import morgan from "morgan";
 import helmet from "helmet";
 import path from "path";
 import { fileURLToPath } from "url";
+import Redis from "ioredis";
+
+export const redisClient = Redis.createClient({
+  url: process.env.REDIS_URL,
+});
+
+// Handle Redis connection events
+redisClient.on("connect", () => {
+  console.log("Connected to Redis server");
+});
+
+redisClient.on("error", (err) => {
+  console.error("Redis Error:", err);
+});
 
 // Create express app
 const app = express();
