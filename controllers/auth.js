@@ -102,17 +102,8 @@ export const register = async (req, res) => {
 
     await pool.query(registrationQuery, registrationValues);
 
-    const payload = {
-      email: email,
-      commEmail: commEmail,
-    };
-
-    // Payload prints fine here
-    await sendConfirmationEmail(req, res, payload);
-
     res.status(201).json({
-      message:
-        "User succesfully registered. Please confirm your account by clicking the link in the email just sent. Thank you!",
+      message: "User succesfully registered. Happy networking!",
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -143,17 +134,9 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid password" });
     }
 
-    // If the user has not confirmed their email, send a 400 status code and a message saying that the user has not confirmed their email
-    if (!quser.confirmed) {
-      return res.status(400).json({
-        message:
-          "Please confirm your email via the link sent to you to login. If you haven't received one yet, please use the option below",
-      });
-    }
-
     var user = {
       email: quser.email,
-      confirmed: quser.confirmed,
+      confirmed: true,
       id: quser.id,
       username: quser.username,
       firstName: quser.firstname,
@@ -169,100 +152,6 @@ export const login = async (req, res) => {
 
     // Send the information back to the frontend
     res.status(200).json({ token: token, expirationDate: expirationDate });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-export const resendConfirmationEmail = async (req, res) => {
-  try {
-    // Retrieve the necessary data from the request, such as email and token
-    const { email, commEmail } = req.body;
-
-    const emailCompany = email.split("@")[1].split(".")[0];
-    let match;
-
-    if (
-      emailCompany === "tangerine" ||
-      emailCompany === "scotiabank" ||
-      emailCompany === "mdfinancial"
-    ) {
-      match = true;
-    } else {
-      match = false;
-    }
-
-    if (!match) {
-      return res.status(401).json({ message: "Invalid email" });
-    }
-
-    const payload = {
-      email: email,
-      commEmail: commEmail,
-    };
-
-    // Call the function responsible for sending the confirmation email
-    await sendConfirmationEmail(req, res, payload);
-
-    // Send the response back to the client
-    res.status(200).json({ message: "Confirmation email resent successfully" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-export const sendConfirmationEmail = async (req, res, payload) => {
-  try {
-    let email = payload.email;
-    let commEmail = payload.commEmail;
-
-    const token = jwt.sign(email, process.env.JWT_SECRET);
-
-    const transporter = nodemailer.createTransport({
-      service: "hotmail",
-      auth: {
-        user: process.env.EMAIL_NAME,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    let url = `${process.env.BACKEND_SERVER_NAME}/auth/confirm-email/${token}`;
-
-    const mailOptions = {
-      from: process.env.EMAIL_NAME,
-      to: commEmail,
-      subject: "Confirm your email",
-      html: `<h1>Email Confirmation</h1>
-    <h2>Hello ${email}</h2>
-    <p>Thank you for registering. Please confirm your email by clicking the link below. Once you do so, your login will work:</p>
-    <a href="${url}">${url}</a>`,
-    };
-
-    await transporter.sendMail(mailOptions, (err, info) => {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log("Email sent: " + info.response);
-        res.status(200).json({ message: "Email sent" });
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-export const confirmEmail = async (req, res) => {
-  try {
-    const token = req.params.token;
-    const email = jwt.verify(token, process.env.JWT_SECRET);
-
-    const query = "UPDATE users SET confirmed=true WHERE email = $1";
-    const values = [email];
-    await pool.query(query, values);
-    res.status(200).json({
-      message:
-        "Succesfully confirmed email account. Please navigate to https://velosphere.onrender.com/",
-    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
