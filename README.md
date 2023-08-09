@@ -90,7 +90,7 @@ My email - amaanjaved2004@gmail.com
 
 Live Website Link: [https://velosphere.onrender.com/](https://velosphere.onrender.com/)
 
-Frontend Repository Link: [https://github.com/amaanjaved1/https://github.com/amaanjaved1/velosphere-frontend](https://github.com/amaanjaved1/https://github.com/amaanjaved1/velosphere-frontend)
+Frontend Repository Link: [https://github.com/amaanjaved1/velosphere-frontend](https://github.com/amaanjaved1/velosphere-frontend)
 
 Backend Repository Link: [https://github.com/amaanjaved1/https://github.com/amaanjaved1/velosphere-backend](https://github.com/amaanjaved1/https://github.com/amaanjaved1/velosphere-backend)
 
