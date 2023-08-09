@@ -92,7 +92,7 @@ Live Website Link: [https://velosphere.onrender.com/](https://velosphere.onrende
 
 Frontend Repository Link: [https://github.com/amaanjaved1/velosphere-frontend](https://github.com/amaanjaved1/velosphere-frontend)
 
-Backend Repository Link: [https://github.com/amaanjaved1/https://github.com/amaanjaved1/velosphere-backend](https://github.com/amaanjaved1/https://github.com/amaanjaved1/velosphere-backend)
+Backend Repository Link: [https://github.com/amaanjaved1/velosphere-backend](https://github.com/amaanjaved1/velosphere-backend)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
