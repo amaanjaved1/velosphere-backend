@@ -11,9 +11,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import Redis from "ioredis";
 
-// export const redisClient = new Redis(process.env.REDIS_URL);
+export const redisClient = new Redis(process.env.REDIS_URL);
 // local host:
-export const redisClient = Redis.createClient({ port: 6380 });
+// export const redisClient = Redis.createClient({ port: 6380 });
 
 // Handle Redis connection events
 redisClient.on("connect", () => {
