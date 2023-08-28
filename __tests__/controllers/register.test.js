@@ -57,7 +57,7 @@ describe("register controller", () => {
     expect(res.json).toHaveBeenCalledWith({ message: "User already exists" });
   });
 
-  it("should return invalid email adress", async () => {
+  it("should return invalid email address", async () => {
     pool.query = jest.fn().mockResolvedValue({
       rows: [],
       rowCount: 0,
