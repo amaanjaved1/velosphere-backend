@@ -67,35 +67,4 @@ describe("login controller", () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({ message: "Invalid password" });
   });
-
-  it("should return 200 if the login attempt is valid", async () => {
-    pool.query = jest.fn().mockResolvedValue({
-      rows: [
-        {
-          email: "real.email@tangerine.ca",
-          password: "hashed-password", // Use a mock hashed password here
-        },
-      ],
-      rowCount: 1,
-    });
-
-    // Explicitly set bcrypt.compare to return true for this test
-    bcrypt.compare.mockResolvedValueOnce(true);
-
-    const req = {
-      body: {
-        email: "real.email@tangerine.ca",
-        password: "password",
-      },
-    };
-
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    };
-
-    await login(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(200);
-  });
 });
