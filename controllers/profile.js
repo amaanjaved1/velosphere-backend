@@ -1,21 +1,5 @@
 import { pool } from "../db.js";
-
-export const connectionStatus = async (req, res, actionFrom, actionTo) => {
-  try {
-    const connectionQuery =
-      "SELECT * FROM connections WHERE (user1id=$1 AND user2id=$2) OR (user1id=$2 AND user2id=$1)";
-    const connectionValues = [actionFrom, actionTo];
-    const { rows } = await pool.query(connectionQuery, connectionValues);
-
-    if (rows.length === 0) {
-      return ["not connected", false];
-    } else {
-      return [rows[0].cstate, rows[0].sentby];
-    }
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+import { connectionStatus } from "./cstate.js";
 
 export const getProfileFull = async (req, res) => {
   try {
@@ -127,7 +111,6 @@ export const sendConnection = async (req, res) => {
     // Check if connection already exists
     const cstate = await connectionStatus(req, res, actionFrom, actionTo);
 
-    console.log(cstate);
     if (cstate[0] !== "not connected") {
       return res.status(401).json({ message: "Connection already exists" });
     }
